@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""ikuuu.nl 每日签到。Cookie 存放在同目录 cookie.txt 中。"""
+"""ikuuu.nl 每日签到。Cookie 通过 --cookie 传入，或回退到同目录 cookie.txt。"""
+import argparse
 import json
 import sys
 import urllib.error
@@ -12,7 +13,6 @@ UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
 )
-COOKIE_FILE = Path(__file__).resolve().parent / "cookie.txt"
 
 
 def log(msg: str) -> None:
@@ -21,12 +21,21 @@ def log(msg: str) -> None:
 
 
 def main() -> int:
-    if not COOKIE_FILE.exists():
-        log(f"ERROR: cookie file missing: {COOKIE_FILE}")
-        return 1
-    cookie = COOKIE_FILE.read_text().strip()
+    parser = argparse.ArgumentParser(description="ikuuu.nl 每日签到")
+    parser.add_argument(
+        "--cookie",
+        help="登录 Cookie 字符串；未提供时回退到同目录 cookie.txt",
+    )
+    args = parser.parse_args()
+
+    if args.cookie:
+        cookie = args.cookie.strip()
+    else:
+        fallback = Path(__file__).resolve().parent / "cookie.txt"
+        cookie = fallback.read_text().strip() if fallback.exists() else ""
+
     if not cookie:
-        log("ERROR: cookie file is empty")
+        log("ERROR: 未提供 --cookie 且同目录 cookie.txt 不存在或为空")
         return 1
 
     req = urllib.request.Request(
