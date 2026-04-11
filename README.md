@@ -19,9 +19,17 @@ ikuuu 的登录接口 `/auth/login` 已经强制 Geetest V4 人机验证，账�
 
 ## 使用
 
+两种方式任选：
+
 ```bash
+# 方式 A：读取同目录 cookie.txt
 python3 checkin.py
+
+# 方式 B：直接通过命令行参数传 Cookie（适合 harness / CI / 一次性调用）
+python3 checkin.py --cookie "uid=...; email=...; key=..."
 ```
+
+两种方式同时存在时 `--cookie` 优先。
 
 输出示例：
 

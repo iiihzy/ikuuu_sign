@@ -8,7 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 认证方式：Cookie
 
-通过读取同目录下的 `cookie.txt`（`.gitignore` 排除，不入库）获取登录态，直接 `POST /user/checkin`。
+两种来源（`--cookie` 优先于文件）：
+
+1. 命令行参数 `--cookie "<cookie string>"` —— 供 harness / skill 调用
+2. 同目录 `cookie.txt`（`.gitignore` 排除，不入库）—— 本地手动用
+
+直接 `POST /user/checkin`，无登录环节。
 
 **不要**改回账号密码方式。`POST /auth/login` 已强制 Geetest V4 人机验证，没有验证码平台就过不去，实测 2026-04-12 报 `系统无法接受您的验证结果`。
 
@@ -17,10 +22,11 @@ Cookie 会过期，用户需要定期手动刷新（F12 抓包 → 替换 `cooki
 ## 运行
 
 ```bash
-python3 checkin.py
+python3 checkin.py                                    # 用 cookie.txt
+python3 checkin.py --cookie "uid=...; email=...; ..."  # 显式传 Cookie
 ```
 
-脚本从 `Path(__file__).resolve().parent / "cookie.txt"` 读取 Cookie —— 所以 `cookie.txt` 必须与 `checkin.py` 在同一目录。
+未传 `--cookie` 时，脚本从 `Path(__file__).resolve().parent / "cookie.txt"` 读取 —— 所以 `cookie.txt` 必须与 `checkin.py` 在同一目录。
 
 ## 退出码
 
