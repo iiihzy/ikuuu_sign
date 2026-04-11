@@ -8,10 +8,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 认证方式：Cookie
 
-两种来源（`--cookie` 优先于文件）：
+三种来源，优先级 `--cookie` > `IKUUU_COOKIE` 环境变量 > `cookie.txt`：
 
-1. 命令行参数 `--cookie "<cookie string>"` —— 供 harness / skill 调用
-2. 同目录 `cookie.txt`（`.gitignore` 排除，不入库）—— 本地手动用
+1. 命令行参数 `--cookie "<cookie string>"` —— 一次性调用、调试
+2. 环境变量 `IKUUU_COOKIE` —— **OpenClaw / skill 调用的标准路径**。本仓库的 `SKILL.md` 声明了 `metadata.openclaw.requires.env: [IKUUU_COOKIE]` 与 `primaryEnv: IKUUU_COOKIE`，OpenClaw 通过 `skills.entries.ikuuu_checkin.env` 注入
+3. 同目录 `cookie.txt`（`.gitignore` 排除，不入库）—— 本地手动用
 
 直接 `POST /user/checkin`，无登录环节。
 
@@ -22,11 +23,12 @@ Cookie 会过期，用户需要定期手动刷新（F12 抓包 → 替换 `cooki
 ## 运行
 
 ```bash
-python3 checkin.py                                    # 用 cookie.txt
-python3 checkin.py --cookie "uid=...; email=...; ..."  # 显式传 Cookie
+python3 checkin.py                                     # 用 cookie.txt（本地手动）
+IKUUU_COOKIE="uid=...; ..." python3 checkin.py         # 用环境变量（harness 标准路径）
+python3 checkin.py --cookie "uid=...; ..."             # 用命令行参数（调试/一次性）
 ```
 
-未传 `--cookie` 时，脚本从 `Path(__file__).resolve().parent / "cookie.txt"` 读取 —— 所以 `cookie.txt` 必须与 `checkin.py` 在同一目录。
+三者按 `--cookie` > `IKUUU_COOKIE` > `cookie.txt` 优先级取值。文件方式下 `cookie.txt` 必须与 `checkin.py` 在同一目录。
 
 ## 退出码
 

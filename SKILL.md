@@ -1,17 +1,25 @@
 ---
-name: ikuuu-checkin
-description: Perform the daily check-in (每日签到) on ikuuu.nl to claim the free traffic bonus. TRIGGER when the user asks to sign in / check in / 签到 to ikuuu, automate their ikuuu daily rewards, or test an ikuuu login cookie. Requires a valid login cookie passed via the `cookie` input; does not accept username/password (the login endpoint enforces Geetest captcha).
+name: ikuuu_checkin
+description: Perform the daily check-in (每日签到) on ikuuu.nl to claim the free traffic bonus. TRIGGER when the user asks to sign in / check in / 签到 to ikuuu, automate their ikuuu daily rewards, or test an ikuuu login cookie. Requires a valid login cookie provided via the IKUUU_COOKIE environment variable; does not accept username/password (the login endpoint enforces Geetest captcha).
+metadata:
+  openclaw:
+    requires:
+      env:
+        - IKUUU_COOKIE
+      bins:
+        - python3
+    primaryEnv: IKUUU_COOKIE
 ---
 
 # ikuuu Daily Check-in
 
 Automates the 每日签到 button on https://ikuuu.nl by POSTing to `/user/checkin` with an authenticated session cookie. Pure Python stdlib, no third-party dependencies.
 
-## Inputs
+## Required environment variable
 
 | Name | Required | Description |
 |------|----------|-------------|
-| `cookie` | yes | Full `Cookie` header value from an authenticated ikuuu.nl browser session. Must include at least `uid`, `email`, `key`. Extra fields like `_ga*` are harmless. |
+| `IKUUU_COOKIE` | yes | Full `Cookie` header value from an authenticated ikuuu.nl browser session. Must include at least `uid`, `email`, `key`. Extra fields like `_ga*` are harmless. |
 
 The user obtains the cookie by:
 
@@ -20,20 +28,41 @@ The user obtains the cookie by:
 3. Clicking the 每日签到 button once manually
 4. Copying the value of the `Cookie:` request header on the resulting `POST /user/checkin` request
 
-## Invocation
+## OpenClaw configuration
 
-Run the bundled `checkin.py` from the skill directory, passing the cookie as `--cookie`:
+Add the skill and its cookie to `~/.openclaw/openclaw.json`:
 
-```bash
-python3 checkin.py --cookie "<cookie string>"
+```json
+{
+  "skills": {
+    "entries": {
+      "ikuuu_checkin": {
+        "enabled": true,
+        "env": {
+          "IKUUU_COOKIE": "uid=...; email=...; key=...; ..."
+        }
+      }
+    }
+  }
+}
 ```
 
-Notes:
-- Use **double quotes** around the cookie string — it contains `;` and `=` which the shell would otherwise parse.
-- If the cookie contains double quotes or `$`, quote with single quotes or escape accordingly.
-- Python 3.8+ is sufficient. No `pip install` needed.
+OpenClaw will inject `IKUUU_COOKIE` into the skill process at invocation time.
 
-If `--cookie` is omitted, the script falls back to reading `cookie.txt` in the same directory. Harness invocations should always pass `--cookie` explicitly and not rely on the fallback.
+## Invocation
+
+Run the bundled `checkin.py` from the skill directory:
+
+```bash
+python3 checkin.py
+```
+
+The script reads the cookie from the `IKUUU_COOKIE` environment variable. It also accepts `--cookie "<cookie string>"` as an explicit override (useful for ad-hoc testing or non-OpenClaw harnesses). Python 3.8+ is sufficient; no `pip install` needed.
+
+Cookie resolution order (first hit wins):
+1. `--cookie` command-line argument
+2. `IKUUU_COOKIE` environment variable ← standard path under OpenClaw
+3. `cookie.txt` in the skill directory (local/manual fallback only)
 
 ## Output
 
@@ -45,7 +74,7 @@ The script prints one log line in the form `[YYYY-MM-DD HH:MM:SS] ret=<n> msg=<s
 | 1 | No cookie supplied | Ask the user to provide a cookie |
 | 2 | HTTP error (4xx/5xx) from ikuuu | Likely transient — retry once; otherwise surface the status code |
 | 3 | Network error (DNS, TCP, timeout) | Check connectivity; retry later |
-| 4 | Response is not JSON — usually HTML login page | **Cookie has expired.** Ask the user to re-authenticate and supply a fresh cookie (see *Inputs* above) |
+| 4 | Response is not JSON — usually HTML login page | **Cookie has expired.** Ask the user to re-authenticate and update `IKUUU_COOKIE` in `openclaw.json` (see *Required environment variable* above) |
 | 5 | `ret=0` — most often `您似乎已经签到过了...` | Not an error. Report that the user has already checked in today |
 
 Exit code 5 is a **success-adjacent** outcome: the operation completed, but no new reward was granted because the user had already signed in that day. Skills calling this should treat it as a benign idempotency outcome, not a failure.

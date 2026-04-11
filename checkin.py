@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""ikuuu.nl 每日签到。Cookie 通过 --cookie 传入，或回退到同目录 cookie.txt。"""
+"""ikuuu.nl 每日签到。Cookie 来源优先级：--cookie > IKUUU_COOKIE 环境变量 > 同目录 cookie.txt。"""
 import argparse
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
@@ -24,18 +25,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="ikuuu.nl 每日签到")
     parser.add_argument(
         "--cookie",
-        help="登录 Cookie 字符串；未提供时回退到同目录 cookie.txt",
+        help="登录 Cookie 字符串；未提供时回退到 IKUUU_COOKIE 环境变量，再回退到同目录 cookie.txt",
     )
     args = parser.parse_args()
 
-    if args.cookie:
-        cookie = args.cookie.strip()
-    else:
+    cookie = (args.cookie or os.environ.get("IKUUU_COOKIE") or "").strip()
+    if not cookie:
         fallback = Path(__file__).resolve().parent / "cookie.txt"
-        cookie = fallback.read_text().strip() if fallback.exists() else ""
+        if fallback.exists():
+            cookie = fallback.read_text().strip()
 
     if not cookie:
-        log("ERROR: 未提供 --cookie 且同目录 cookie.txt 不存在或为空")
+        log("ERROR: 未提供 Cookie。可通过 --cookie、IKUUU_COOKIE 环境变量或 cookie.txt 提供")
         return 1
 
     req = urllib.request.Request(

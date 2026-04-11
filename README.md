@@ -19,17 +19,18 @@ ikuuu 的登录接口 `/auth/login` 已经强制 Geetest V4 人机验证，账�
 
 ## 使用
 
-两种方式任选：
+三种 Cookie 来源，优先级 **`--cookie` > `IKUUU_COOKIE` 环境变量 > `cookie.txt`**：
 
 ```bash
-# 方式 A：读取同目录 cookie.txt
+# 方式 A：本地手动用，读取同目录 cookie.txt
 python3 checkin.py
 
-# 方式 B：直接通过命令行参数传 Cookie（适合 harness / CI / 一次性调用）
+# 方式 B：通过环境变量传入（适合 OpenClaw、Claude Code 等 harness）
+IKUUU_COOKIE="uid=...; email=...; key=..." python3 checkin.py
+
+# 方式 C：命令行参数显式传入（适合一次性调用或调试）
 python3 checkin.py --cookie "uid=...; email=...; key=..."
 ```
-
-两种方式同时存在时 `--cookie` 优先。
 
 输出示例：
 
