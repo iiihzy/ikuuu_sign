@@ -1,6 +1,6 @@
 # ikuuu 自动签到
 
-用 Cookie 替你每天在 [ikuuu.nl](https://ikuuu.nl) 点一下"每日签到"的小脚本。Python 标准库，零依赖。
+用 Cookie 替你每天在 [ikuuu.top](https://ikuuu.top) 点一下"每日签到"的小脚本。Python 标准库，零依赖。
 
 ## 为什么是 Cookie 而不是账号密码
 
@@ -8,7 +8,7 @@ ikuuu 的登录接口 `/auth/login` 已经强制 Geetest V4 人机验证，账�
 
 ## 准备 Cookie
 
-1. 浏览器登录 ikuuu，打开 `https://ikuuu.nl/user`
+1. 浏览器登录 ikuuu，打开 `https://ikuuu.top/user`
 2. `F12` → **Network** 标签页
 3. 手动点一次"每日签到"按钮
 4. 在请求列表里找到 `checkin` 这个 POST 请求

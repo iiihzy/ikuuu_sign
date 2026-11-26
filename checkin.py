@@ -9,7 +9,7 @@ import urllib.request
 from datetime import datetime
 from pathlib import Path
 
-URL = "https://ikuuu.nl/user/checkin"
+URL = "https://ikuuu.top/user/checkin"
 UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
@@ -45,8 +45,8 @@ def main() -> int:
         headers={
             "Cookie": cookie,
             "User-Agent": UA,
-            "Referer": "https://ikuuu.nl/user",
-            "Origin": "https://ikuuu.nl",
+            "Referer": "https://ikuuu.top/user",
+            "Origin": "https://ikuuu.top",
             "X-Requested-With": "XMLHttpRequest",
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Content-Length": "0",
