@@ -8,14 +8,37 @@ ikuuu 的登录接口 `/auth/login` 已经强制 Geetest V4 人机验证，账�
 
 ## 准备 Cookie
 
-1. 浏览器登录 ikuuu，打开 `https://ikuuu.top/user`
-2. `F12` → **Network** 标签页
-3. 手动点一次"每日签到"按钮
-4. 在请求列表里找到 `checkin` 这个 POST 请求
-5. 在 **Headers → Request Headers** 里复制 `Cookie:` 冒号后面的整串
-6. 粘贴到本目录的 `cookie.txt`（新建此文件），保存
+先在浏览器登录 ikuuu，打开 `https://ikuuu.top/user`，按 `F12` 打开开发者工具。以下任选一种方式获取 Cookie，无需先手动签到。
 
-关键字段是 `uid`、`email`、`key`，其他（`_ga*`、`_gid`）是统计用的，留着不影响。
+### 方式 A：Application（应用）
+
+1. 打开 **Application（应用） → Storage（存储） → Cookies**。
+2. 选择当前登录的 ikuuu 域名。
+3. 将所需 Cookie 的 **Name（名称）** 和 **Value（值）** 按 `名称=值` 组合，多项之间用 `; ` 分隔，例如：
+
+```text
+uid=你的值; email=你的值; key=你的值
+```
+
+关键字段是 `uid`、`email`、`key`。也可以带上当前域名的其他 Cookie；不要复制表头、Domain、Path 等列。
+
+### 方式 B：Console（控制台）
+
+在当前已登录的 ikuuu 页面，打开 **Console（控制台）**，执行：
+
+```javascript
+copy(document.cookie)
+```
+
+可由 JavaScript 读取的 Cookie 会直接复制到剪贴板。注意：`document.cookie` 无法读取标记为 **HttpOnly** 的 Cookie；如果缺少必需字段，使用方式 A 或下面的 Network 方法。
+
+### 方式 C：Network（网络）
+
+1. 打开 **Network（网络）** 标签页，刷新当前已登录页面。
+2. 选择发送到 ikuuu 的请求，在 **Headers → Request Headers** 中复制 `Cookie:` 后面的整串值。
+3. 如果当前请求没有 Cookie 请求头，可以选择另一个登录后的请求。
+
+将获取到的 Cookie 粘贴到项目目录的 `cookie.txt`（新建此文件），保存为一行纯文本，不要加 `Cookie:` 前缀或额外引号。也可以通过下面的环境变量方式传入。
 
 ## 使用
 
